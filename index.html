@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interactive Resume Builder</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f7f9fc;
+      color: #4a4a4a;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 20px;
+    }
+
+    @media screen and (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+    }
+
+    form {
+      flex: 1 1 400px;
+      margin: 10px;
+      padding: 30px;
+      background: linear-gradient(135deg, #faf3e0, #ffe8d6);
+      border-radius: 12px;
+      box-shadow: 0 0 10px #ccc;
+      transition: all 0.3s ease-in-out;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fdfdfd;
+      transition: 0.3s;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #ff7b54;
+      box-shadow: 0 0 0 2px rgba(255, 123, 84, 0.2);
+    }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    #resumePreview {
+      flex: 1 1 400px;
+      margin: 10px auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      font-family: 'Lora', serif;
+      color: #333;
+      max-width: 600px;
+      transition: transform 0.4s ease, box-shadow 0.3s;
+    }
+
+    #resumePreview:hover {
+      transform: scale(1.01);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    h2,
+    h4 {
+      border-bottom: 2px solid #333;
+      padding-bottom: 5px;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <form id="resumeForm">
+      <h2>Build Your Resume</h2>
+      <input type="text" id="name" placeholder="Full Name" />
+      <input type="email" id="email" placeholder="Email" />
+      <input type="tel" id="phone" placeholder="Phone Number" />
+      <textarea id="summary" placeholder="Profile Summary"></textarea>
+
+      <h3>Education</h3>
+      <div id="education-section"></div>
+      <button type="button" onclick="addEducation()">Add Education</button>
+
+      <h3>Experience</h3>
+      <div id="experience-section"></div>
+      <button type="button" onclick="addExperience()">Add Experience</button>
+
+      <h3>Skills</h3>
+      <input type="text" id="skills" placeholder="Comma separated skills" />
+
+      <div class="buttons">
+        <button type="button" onclick="clearForm()">Clear</button>
+        <button type="button" onclick="downloadResume()">Download PDF</button>
+      </div>
+    </form>
+
+    <div id="resumePreview">
+      <h2 id="preview-name"></h2>
+      <p><strong>Email:</strong> <span id="preview-email"></span></p>
+      <p><strong>Phone:</strong> <span id="preview-phone"></span></p>
+      <p id="preview-summary"></p>
+      <div id="preview-education"></div>
+      <div id="preview-experience"></div>
+      <div id="preview-skills"></div>
+    </div>
+  </div>
+
+  <!-- JS Functionality -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    document.querySelectorAll('#resumeForm input, #resumeForm textarea').forEach(el => {
+      el.addEventListener('input', updatePreview);
+    });
+
+    function updatePreview() {
+      document.getElementById('preview-name').innerText = document.getElementById('name').value;
+      document.getElementById('preview-email').innerText = document.getElementById('email').value;
+      document.getElementById('preview-phone').innerText = document.getElementById('phone').value;
+      document.getElementById('preview-summary').innerText = document.getElementById('summary').value;
+
+      let skills = document.getElementById('skills').value.split(',').map(s => s.trim());
+      document.getElementById('preview-skills').innerHTML = "<strong>Skills:</strong> " + skills.join(', ');
+    }
+
+    function addEducation() {
+      const section = document.getElementById('education-section');
+      const input = document.createElement('input');
+      input.placeholder = "e.g., BSc in Computer Science, XYZ University";
+      input.addEventListener('input', showEducation);
+      section.appendChild(input);
+    }
+
+    function showEducation() {
+      const inputs = document.querySelectorAll('#education-section input');
+      const preview = document.getElementById('preview-education');
+      preview.innerHTML = "<h4>Education:</h4><ul>" +
+        Array.from(inputs).map(i => `<li>${i.value}</li>`).join('') + "</ul>";
+    }
+
+    function addExperience() {
+      const section = document.getElementById('experience-section');
+      const input = document.createElement('input');
+      input.placeholder = "e.g., Developer at ABC Corp (2021–2023)";
+      input.addEventListener('input', showExperience);
+      section.appendChild(input);
+    }
+
+    function showExperience() {
+      const inputs = document.querySelectorAll('#experience-section input');
+      const preview = document.getElementById('preview-experience');
+      preview.innerHTML = "<h4>Experience:</h4><ul>" +
+        Array.from(inputs).map(i => `<li>${i.value}</li>`).join('') + "</ul>";
+    }
+
+    function clearForm() {
+      document.getElementById('resumeForm').reset();
+      document.getElementById('resumePreview').innerHTML = '';
+    }
+
+    function downloadResume() {
+      const resume = document.getElementById('resumePreview');
+      html2pdf().from(resume).save();
+    }
+  </script>
+</body>
+</html>
